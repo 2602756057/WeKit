@@ -191,11 +191,7 @@ object WeMessageApi : ApiFeature(), IResolveDex {
             }
         }
     }
-    private val classImportMultiVideo by dexClass {
-        matcher {
-            usingEqStrings("MicroMsg.GetVideoMetadata", "get video file name, dataString ")
-        }
-    }
+    private val classImportMultiVideo by dexClass()
     private val classAppMessage by dexClass {
         matcher {
             usingEqStrings("MicroMsg.AppMessage", "parse amessage xml failed")
@@ -495,6 +491,28 @@ object WeMessageApi : ApiFeature(), IResolveDex {
 
     @SuppressLint("NonUniqueDexKitData")
     override fun resolveDex(dexKit: DexKitBridge) {
+        // 多视频导入线程 (ImportMultiVideo): 8.0.65–8.0.78 由 "MicroMsg.GetVideoMetadata" +
+        // "get video file name, dataString " 两条日志唯一定位。宿主更新后第二条日志被删除,
+        // 导入流程已重构 (仅确认 EditorVideoCompress / NoteVideoCompress 压缩线程与服务式接口,
+        // 无经真机验证的等价结构)。旧路径 0 命中时按「受支持宿主上的有意缺失」置占位
+        // (预期失败): sendVideo 在该宿主上报错并返回 false, WeMessageApi 其余功能不受影响。
+        val importMultiVideoClasses = dexKit.findClass {
+            matcher {
+                usingEqStrings("MicroMsg.GetVideoMetadata", "get video file name, dataString ")
+            }
+        }
+        when (importMultiVideoClasses.size) {
+            1 -> classImportMultiVideo.setDescriptor(importMultiVideoClasses.single())
+            0 -> classImportMultiVideo.setPlaceholderDescriptor(
+                expectedFailure = true,
+                reason = "multi-video import thread is absent on this host build",
+            )
+            else -> error(
+                "multiple ImportMultiVideo candidates: " +
+                    importMultiVideoClasses.joinToString { it.name }
+            )
+        }
+
         val quoteCompose = methodQuoteCompose.data
         val quoteMsgItem = dexKit.findClass {
             matcher { className = "com.tencent.mm.plugin.msgquote.model.MsgQuoteItem" }
