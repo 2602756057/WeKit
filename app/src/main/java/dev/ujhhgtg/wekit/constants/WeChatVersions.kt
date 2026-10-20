@@ -1,6 +1,7 @@
 package dev.ujhhgtg.wekit.constants
 
 object WeChatVersions {
+    const val MM_8_0_79 = 3200
     const val MM_8_0_72 = 3100
     const val MM_8_0_71 = 3080
     const val MM_8_0_70 = 3060
