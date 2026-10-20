@@ -20,7 +20,12 @@ object AutoAddNearbyFriends : ClickableFeature(), IResolveDex {
     override val categoryIds = listOf(FeatureCategoryIds.CONTACTS_GROUPS)
     override val descriptionRes = R.string.feature_auto_add_nearby_friends_description
 
-    private val methodCreateMenu by dexMethod {
+    // 8.0.79 移除了附近的人资料页直播浮层菜单: "NearbyPersonUIC" 日志标签与
+    // "showLiveBottomSheet create menu." 日志均不再存在, 无等价结构可探测。
+    // 该结构跨支持版本存在性不同 (8.0.65–8.0.78 存在, 8.0.79 起缺失), 按约定
+    // 设 allowFailure: 旧版本正常注入菜单项, 新版本预期失败、功能降级为不可用,
+    // 不影响其他 feature。
+    private val methodCreateMenu by dexMethod(allowFailure = true) {
         matcher {
             usingEqStrings("NearbyPersonUIC", "showLiveBottomSheet create menu.")
         }
