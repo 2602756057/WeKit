@@ -77,9 +77,19 @@ val gitHash = providers.exec {
 }.standardOutput.asText.map { it.trim() }
 
 android {
-    namespace = libs.versions.namespace.get()
-    compileSdk {
-        version = release(libs.versions.compileSdk.get().toInt())
+    println("::warning title=WKANDROID::entered android block")
+    println("::warning title=WKSDKVALS::compileSdk=" + libs.versions.compileSdk.get() + " minor=" + libs.versions.compileSdkMinor.get())
+    println("::warning title=WKAGPVER::" + com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION)
+    try {
+        compileSdk {
+            version = release(libs.versions.compileSdk.get().toInt())
+        }
+        println("::warning title=WKCSOK::csv=" + compileSdkVersion)
+    } catch (t: Throwable) {
+        println(
+            "::error title=WKCSEXC::" + t.javaClass.name + " :: " +
+                (t.message ?: "").replace("\n", " ").take(400),
+        )
     }
     println(
         "::error title=WEKITDIAG::ext=" + javaClass.name +
