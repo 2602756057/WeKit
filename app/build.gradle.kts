@@ -1,4 +1,4 @@
-@file:Suppress("AvoidDuplicateDependencies")
+@file:Suppress("AvoidDuplicateDependencies", "DEPRECATION", "DEPRECATION_ERROR")
 
 import com.android.build.api.variant.BuildConfigField
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -76,7 +76,14 @@ val gitHash = providers.exec {
 
 android {
     namespace = libs.versions.namespace.get()
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk {
+        version = release(libs.versions.compileSdk.get().toInt())
+    }
+    println(
+        "::error title=WEKITDIAG::ext=" + javaClass.name +
+            " csv=" + compileSdkVersion +
+            " agp=" + (javaClass.protectionDomain?.codeSource?.location?.toString() ?: "?"),
+    )
     ndkVersion = libs.versions.ndk.get()
 
     defaultConfig {
