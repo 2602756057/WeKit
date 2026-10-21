@@ -1,4 +1,4 @@
-@file:Suppress("AvoidDuplicateDependencies", "DEPRECATION", "DEPRECATION_ERROR")
+@file:Suppress("AvoidDuplicateDependencies")
 
 import com.android.build.api.variant.BuildConfigField
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
-    // id("dev.ujhhgtg.lsparanoid") version "0.13.3" — 私有插件 fork 构建不可用, 已禁用
+    // id("dev.ujhhgtg.lsparanoid") version "0.13.3"  -- private plugin, only published to the author's mavenLocal
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.kotlin.compose)
@@ -14,8 +14,6 @@ plugins {
     alias(libs.plugins.aboutlibraries)
     alias(libs.plugins.aboutlibraries.android)
 }
-
-println("::warning title=WKTOPPROBE::app-script-start plugins-done")
 
 // Decide per variant, so a single assemble invocation can build plain debug and protected release.
 // Validation invocations share main outputs with their tests and must remain entirely unprotected.
@@ -29,39 +27,7 @@ val protectionValidation = providers.gradleProperty("dexTestWorker").orNull == "
             "check", "connectedcheck", "devicecheck", "build", "buildneeded", "builddependents",
         )
     }
-/* lsparanoid {
-lsparanoid {
-    variantFilter = { variant ->
-        !protectionValidation && (protectionOverride ?: (variant.buildType == "release"))
-    }
-    backend = providers.gradleProperty("lspBackend").orElse("native").get()
-    automaticLoading = false
-    allowedHostCertificates = mapOf(
-        "com.tencent.mm" to setOf("0fe4ff85c215918396dadc7cd8ce6963339af33d37751a56e54c7206b63a3c7c"),
-    )
-    nativeNdkVersion = providers.gradleProperty("lspNdkVersion").orElse("29.0.14206865").get()
-    omvllPlugin = providers.gradleProperty("lspOmvllPlugin").orNull
-    omvllPythonPath = providers.gradleProperty("lspOmvllPythonPath").orNull
-    classFilter = { it.startsWith("dev.ujhhgtg.wekit.") }
-    excludedClassPrefixes = setOf(
-        "dev.ujhhgtg.wekit.application.ModuleApplication",
-        "dev.ujhhgtg.wekit.loader.startup.ModuleLoader",
-        "dev.ujhhgtg.wekit.loader.entry",
-        "dev.ujhhgtg.wekit.loader.utils.NativeLoader",
-        "dev.ujhhgtg.wekit.loader.utils.ZygiskNativePayload",
-        "dev.ujhhgtg.wekit.constants.PackageNames",
-        "dev.ujhhgtg.wekit.utils.fs.PathUtilsKt",
-        "dev.ujhhgtg.wekit.BuildConfig",
-    )
-    if (backend == "native") {
-        wrappedResourceAccess = true
-        resourceIncludes = setOf("string/*", "plurals/*", "array/*")
-        resourceExcludes = setOf(
-            "string/restart_wechat_to_apply", "string/nav_edit_enable_first",
-            "string/automation_name_required", "string/res_inject_success",
-        )
-    }
-} */
+
 
 // Keep Git values lazy: reading them during configuration invalidates the configuration cache
 // on every commit. Wire these providers into variant/task inputs instead.
@@ -77,25 +43,12 @@ val gitHash = providers.exec {
 }.standardOutput.asText.map { it.trim() }
 
 android {
-    println("::warning title=WKANDROID::entered android block")
-    println("::warning title=WKSDKVALS::compileSdk=" + libs.versions.compileSdk.get() + " minor=" + libs.versions.compileSdkMinor.get())
-    println("::warning title=WKAGPVER::" + com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION)
-    try {
-        compileSdk {
-            version = release(libs.versions.compileSdk.get().toInt())
+    namespace = libs.versions.namespace.get()
+    compileSdk {
+        version = release(libs.versions.compileSdk.get().toInt()) {
+            minorApiLevel = libs.versions.compileSdkMinor.get().toInt()
         }
-        println("::warning title=WKCSOK::csv=" + compileSdkVersion)
-    } catch (t: Throwable) {
-        println(
-            "::error title=WKCSEXC::" + t.javaClass.name + " :: " +
-                (t.message ?: "").replace("\n", " ").take(400),
-        )
     }
-    println(
-        "::error title=WEKITDIAG::ext=" + javaClass.name +
-            " csv=" + compileSdkVersion +
-            " agp=" + (javaClass.protectionDomain?.codeSource?.location?.toString() ?: "?"),
-    )
     ndkVersion = libs.versions.ndk.get()
 
     defaultConfig {
@@ -510,7 +463,4 @@ tasks.withType<KotlinJvmCompile>().configureEach {
 }
 
 // The localization adapter remains present in JVM development variants.
-// dependencies { implementation("dev.ujhhgtg.lsparanoid:runtime:0.13.3") }
-// dependencies { implementation("dev.ujhhgtg.lsparanoid:runtime:0.13.3") } — 私有运行时, fork 构建不可用
-
-println("::warning title=WKEND::script-reached-end")
+// dependencies { implementation("dev.ujhhgtg.lsparanoid:runtime:0.13.3") }  -- runtime only exists in the author's mavenLocal
