@@ -15,6 +15,8 @@ plugins {
     alias(libs.plugins.aboutlibraries.android)
 }
 
+println("::warning title=WKTOPPROBE::app-script-start plugins-done")
+
 // Decide per variant, so a single assemble invocation can build plain debug and protected release.
 // Validation invocations share main outputs with their tests and must remain entirely unprotected.
 val protectionOverride = providers.gradleProperty("protect").map { value ->
