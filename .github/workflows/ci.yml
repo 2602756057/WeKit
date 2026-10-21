@@ -36,7 +36,7 @@ jobs:
         !startsWith(github.event.head_commit.message, '[skip ci]') && 
         (
           github.event_name == 'pull_request' ||
-          (github.repository == 'Ujhhgtg/WeKit-Dev' && github.ref == 'refs/heads/master')
+          (github.repository == '2602756057/WeKit' && github.ref == 'refs/heads/master')
         )
       )
     steps:
