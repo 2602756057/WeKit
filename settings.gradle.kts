@@ -6,6 +6,9 @@ enableFeaturePreview("NO_IMPLICIT_LOOKUP_IN_PARENT_PROJECTS")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
+    plugins {
+        id("com.android.settings") version "9.3.3" apply false
+    }
     repositories {
         mavenLocal { content { includeGroup("dev.ujhhgtg.lsparanoid") } }
         google {
@@ -67,6 +70,13 @@ dependencyResolutionManagement {
 
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+    id("com.android.settings")
+}
+
+// AGP 9 requires the project-level compileSdk to be declared here: the module-level
+// `android { compileSdk { ... } }` block no longer satisfies the plugin on its own.
+android {
+    compileSdk { version = release(37) }
 }
 
 rootProject.name = "wekit"
