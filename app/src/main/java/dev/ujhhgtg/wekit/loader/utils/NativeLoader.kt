@@ -2,8 +2,6 @@ package dev.ujhhgtg.wekit.loader.utils
 
 import android.annotation.SuppressLint
 import android.os.Process
-import android.os.ParcelFileDescriptor
-import dev.ujhhgtg.lsparanoid.generated.LspBootstrap
 import dev.ujhhgtg.wekit.loader.startup.StartupInfo
 import java.io.File
 
@@ -15,9 +13,6 @@ object NativeLoader {
     private var zygiskNativeLibraries: Map<String, File> = emptyMap()
     private var installedNativeLibraryDir: File? = null
     private var nativeLibrariesLoaded = false
-    // Native verification discovers this descriptor independently through /proc/self/fd.
-    // Keep it alive for in-memory LSPosed/Zygisk dex loaders, which need not map the APK.
-    private var decoderApkDescriptor: ParcelFileDescriptor? = null
 
     /** Configures the copied Zygisk APK before module startup reaches [init]. */
     @JvmStatic
@@ -30,21 +25,15 @@ object NativeLoader {
         zygiskPayload = ZygiskNativePayload(apk, appDataDir)
     }
 
-    /** Loads the string decoder before startup or feature classes execute protected literals. */
-    fun initDecoder(modulePath: String) = synchronized(nativeLoadLock) {
-        if (LspBootstrap.libraryFileName.isEmpty() || LspBootstrap.isLoaded()) return@synchronized
-        val payload = zygiskPayload
-        if (decoderApkDescriptor == null) {
-            decoderApkDescriptor = ParcelFileDescriptor.open(payload?.apk ?: File(modulePath), ParcelFileDescriptor.MODE_READ_ONLY)
-        }
-        val decoder = if (payload == null) {
-            val instructionSet = if (Process.is64Bit()) "arm64" else "arm"
-            val directory = File(requireNotNull(File(modulePath).parentFile), "lib/$instructionSet")
-            File(directory, LspBootstrap.libraryFileName)
-        } else {
-            payload.decoderLibrary(LspBootstrap.libraryFileName)
-        }
-        LspBootstrap.loadAbsolute(decoder)
+    /**
+     * Loads the string decoder before startup or feature classes execute protected literals.
+     *
+     * The upstream decoder is delivered by the author's private `lsparanoid` Gradle plugin, which
+     * only resolves from a local Maven repository and is unavailable to forks. The decoder therefore
+     * stays disabled here; the module still builds and hooks normally.
+     */
+    fun initDecoder(modulePath: String) {
+        // Intentionally empty: the lsparanoid decoder is unavailable in fork builds.
     }
 
     /** The module APK used as the class path for standalone child processes. */
