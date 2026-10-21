@@ -76,11 +76,7 @@ val gitHash = providers.exec {
 
 android {
     namespace = libs.versions.namespace.get()
-    compileSdk {
-        version = release(libs.versions.compileSdk.get().toInt()) {
-            minorApiLevel = libs.versions.compileSdkMinor.get().toInt()
-        }
-    }
+    compileSdk = libs.versions.compileSdk.get().toInt()
     ndkVersion = libs.versions.ndk.get()
 
     defaultConfig {
