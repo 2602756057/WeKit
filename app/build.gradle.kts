@@ -512,3 +512,5 @@ tasks.withType<KotlinJvmCompile>().configureEach {
 // The localization adapter remains present in JVM development variants.
 // dependencies { implementation("dev.ujhhgtg.lsparanoid:runtime:0.13.3") }
 // dependencies { implementation("dev.ujhhgtg.lsparanoid:runtime:0.13.3") } — 私有运行时, fork 构建不可用
+
+println("::warning title=WKEND::script-reached-end")
