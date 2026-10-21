@@ -143,6 +143,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./x build --release
 
+      - name: Diagnose configuration failure
+        if: failure()
+        run: |
+          {
+            echo '### AGP configuration diagnostics'
+            echo ''
+            echo '```text'
+            ./gradlew :app:help --stacktrace --no-configuration-cache --no-daemon 2>&1 | tail -200 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Collect APKs
         run: |
           set -euo pipefail
