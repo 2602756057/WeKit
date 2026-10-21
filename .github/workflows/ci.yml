@@ -146,13 +146,15 @@ jobs:
       - name: Diagnose configuration failure
         if: failure()
         run: |
-          {
-            echo '### AGP configuration diagnostics'
-            echo ''
-            echo '```text'
-            ./gradlew :app:help --stacktrace --no-configuration-cache --no-daemon 2>&1 | tail -200 || true
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          set +e
+          out=$(./gradlew :app:help --stacktrace --no-configuration-cache --no-daemon 2>&1)
+          echo "$out" | tail -80
+          what=$(printf '%s' "$out" | sed -n '/What went wrong/,/^\* Try:/p' | tr '\n' ' ' | tr -s ' ' | cut -c1-500)
+          cause=$(printf '%s' "$out" | grep -E '^Caused by' | head -3 | tr '\n' ' ' | cut -c1-500)
+          hits=$(printf '%s' "$out" | grep -i 'compilesdk' | head -4 | tr '\n' ' ' | cut -c1-400)
+          echo "::error title=AGPDiagWhat::${what}"
+          echo "::error title=AGPDiagCause::${cause}"
+          echo "::warning title=AGPDiagHits::${hits}"
       - name: Collect APKs
         run: |
           set -euo pipefail
