@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
-    id("dev.ujhhgtg.lsparanoid") version "0.13.3"
+    // id("dev.ujhhgtg.lsparanoid") version "0.13.3" — 私有插件 fork 构建不可用, 已禁用
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.kotlin.compose)
@@ -27,7 +27,7 @@ val protectionValidation = providers.gradleProperty("dexTestWorker").orNull == "
             "check", "connectedcheck", "devicecheck", "build", "buildneeded", "builddependents",
         )
     }
-
+/* lsparanoid {
 lsparanoid {
     variantFilter = { variant ->
         !protectionValidation && (protectionOverride ?: (variant.buildType == "release"))
@@ -59,7 +59,7 @@ lsparanoid {
             "string/automation_name_required", "string/res_inject_success",
         )
     }
-}
+} */
 
 // Keep Git values lazy: reading them during configuration invalidates the configuration cache
 // on every commit. Wire these providers into variant/task inputs instead.
@@ -495,4 +495,5 @@ tasks.withType<KotlinJvmCompile>().configureEach {
 }
 
 // The localization adapter remains present in JVM development variants.
-dependencies { implementation("dev.ujhhgtg.lsparanoid:runtime:0.13.3") }
+// dependencies { implementation("dev.ujhhgtg.lsparanoid:runtime:0.13.3") }
+// dependencies { implementation("dev.ujhhgtg.lsparanoid:runtime:0.13.3") } — 私有运行时, fork 构建不可用
