@@ -10,7 +10,7 @@ class ModuleApplication : Application() {
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
-        LspBootstrap.loadInstalled()
+        // LspBootstrap.loadInstalled() — lsparanoid 私有运行时不可用, 已禁用
     }
 
     override fun onCreate() {
