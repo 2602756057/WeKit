@@ -135,7 +135,17 @@ jobs:
           WEKIT_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           WEKIT_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           WEKIT_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./x build --release
+        run: |
+          set +e
+          ./x build --release 2>&1 | tee $RUNNER_TEMP/build.log
+          rc=${PIPESTATUS[0]}
+          if [ $rc -ne 0 ]; then
+            first=$(grep -n -m1 -E '^e: |^FAILURE|Script compilation|error:' $RUNNER_TEMP/build.log | cut -c1-300)
+            ctx=$(grep -n -A10 -m1 -E 'Script compilation|What went wrong' $RUNNER_TEMP/build.log | tr '\n' ' ' | tr -s ' ' | cut -c1-900)
+            echo "::error title=WKBUILDFAIL::rc=$rc first=${first}"
+            echo "::error title=WKBUILDCTX::${ctx}"
+            exit $rc
+          fi
 
       - name: Build Release (Unsigned)
         if: github.event_name == 'pull_request'
