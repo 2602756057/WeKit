@@ -144,6 +144,9 @@ jobs:
             ctx=$(grep -n -A10 -m1 -E 'Script compilation|What went wrong' $RUNNER_TEMP/build.log | tr '\n' ' ' | tr -s ' ' | cut -c1-900)
             echo "::error title=WKBUILDFAIL::rc=$rc first=${first}"
             echo "::error title=WKBUILDCTX::${ctx}"
+            probes=$(grep -E 'WKTOPPROBE|WKANDROID|WKSDKVALS|WKAGPVER|WKCSOK|WKCSEXC|WKEND' $RUNNER_TEMP/build.log | tr '\n' '|' | tr -s ' ' | cut -c1-900)
+            ecount=$(grep -c -E '^e: |Script compilation' $RUNNER_TEMP/build.log)
+            echo "::error title=WKPROBES::count=${ecount} probes=${probes}"
             exit $rc
           fi
 
